@@ -1,21 +1,28 @@
 import { inngest } from "./client";
-import { openai, createAgent, createTool, createNetwork } from "@inngest/agent-kit";
+import { openai, createAgent, createTool, createNetwork, type Tool } from "@inngest/agent-kit";
 import { Sandbox } from "@e2b/code-interpreter"
 import { getSandbox, lastAssistantTextMessageContent } from "./utils";
 import { z } from "zod";
 import { PROMPT } from "@/prompt";
+import { prisma } from "@/lib/db";
 
-export const helloWorld = inngest.createFunction(
-  { id: "hello-world" },
-  { event: "test/hello.world" },
+interface AgentState {
+  summary: string;
+  files: { [path:string]: string}; 
+  // these two lines will fix the "any" type error input
+};
+
+export const codeAgentFunction = inngest.createFunction(
+  { id: "code-agent" },
+  { event: "code-agent/run" },
   async ({ event, step }) => {
     const sandboxId = await step.run("get-sandbox-id", async () => {
-      const sandbox = await Sandbox.create("vibe-nextjs-siz-test-4");
+      const sandbox = await Sandbox.create("vibe-nextjs-siz-test-4"); // the same name with `sandbox-templates/nextjs/e2b.toml` file
       return sandbox.sandboxId;
     });
 
     // Create a new agent with a system prompt
-    const codeAgent = createAgent({
+    const codeAgent = createAgent<AgentState>({
       name: "code-agent",
       description: "An expert coding agent",
       system: PROMPT,
@@ -74,7 +81,7 @@ export const helloWorld = inngest.createFunction(
           }),
           handler: async (
             { files },
-            { step, network }
+            { step, network }: Tool.Options<AgentState> // use this to make "files" not "any" type anymore
           ) => {
             const newFiles = await step?.run("createOrUpdateFiles", async () => {
               try {
@@ -140,7 +147,7 @@ export const helloWorld = inngest.createFunction(
       },
     });
 
-    const network = createNetwork({
+    const network = createNetwork<AgentState>({
       name: "coding-agent-network",
       agents: [codeAgent],
       maxIter: 15, // limit how many loops the agent can do
@@ -163,12 +170,42 @@ export const helloWorld = inngest.createFunction(
 
     const result = await network.run(event.data.value);
 
+    const isError = !result.state.data.summary || Object.keys(result.state.data.files || {}).length === 0; // something went wrong
+
     // show the user
     const sandboxUrl = await step.run("get-sandbox-url", async () => {
       const sandbox = await getSandbox(sandboxId);
       const host = sandbox.getHost(3000) // create a host under port 3000
       return `https://${host}`;
     })
+
+    // save the assistant's summary result message
+    await step.run("save-result", async () => {
+      if (isError) {
+        return await prisma.message.create({
+          data: {
+            content: "Something went wrong. Please try again",
+            role: "ASSISTANT",
+            type: "ERROR", // caution: the data of prisma message always has to have these three, with fragment to be optional
+          },
+        });
+      } // if there is an error then we don't create the fragment
+
+      return await prisma.message.create({
+        data: {
+          content: result.state.data.summary,
+          role: "ASSISTANT",
+          type: "RESULT",
+          fragment: {
+            create: {
+              sandboxUrl: sandboxUrl,
+              title: "Fragment",
+              files: result.state.data.files, // caution: the data of fragment always has to have these three
+            },
+          },
+        },
+      })
+    });
 
     // // return for agent
     // return { output, sandboxUrl } 

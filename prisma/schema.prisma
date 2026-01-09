@@ -1,20 +1,62 @@
+// generator client {
+//   provider = "prisma-client"
+//   output   = "../app/generated/prisma"
+// }
+
 generator client {
   provider = "prisma-client"
-  output   = "../app/generated/prisma"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
 }
 
-model User {
-  id    Int     @id @default(autoincrement())
-  name  String?
+// model User {
+//   id    Int     @id @default(autoincrement())
+//   name  String?
+// }
+
+// model Post {
+//   id        Int     @id @default(autoincrement())
+//   content   String?
+//   published Boolean @default(false)
+//   authorId  Int
+// }
+
+enum MessageRole {
+  USER
+  ASSISTANT
 }
 
-model Post {
-  id        Int     @id @default(autoincrement())
-  content   String?
-  published Boolean @default(false)
-  authorId  Int
+enum MessageType {
+  RESULT
+  ERROR
+}
+
+model Message {
+  id String @id @default(uuid())
+  content String
+  role MessageRole
+  type MessageType
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt // a decorator that update this field when we update the message model
+
+  // The message doesn't have to have a fragment (the "?" marked as optional)
+  // If the user sending a message, there will be no fragment, only for the AI response
+  fragment Fragment?
+}
+
+model Fragment {
+  id String @id @default(uuid())
+  messageId String @unique
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  // Cascade means if the message gets deleted, the fragment gets deleted
+
+  sandboxUrl String
+  title String
+  files Json
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt 
 }

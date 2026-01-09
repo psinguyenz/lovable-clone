@@ -122,7 +122,7 @@ export const helloWorld = inngest.createFunction(
             })
           },
         })
-      ], // end of tools, the AI has access to all 3 tools equally and create it own's blend.
+      ], // end of tools, the AI has access to use all 3 tools equally and mix it own and use tool results (stdout, file contents, etc.)
 
       lifecycle: {
         onResponse: async ({result, network}) => {

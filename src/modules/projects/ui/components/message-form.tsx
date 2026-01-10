@@ -11,6 +11,7 @@ import { useTRPC } from "@/trpc/client";
 import { Button } from "@/components/ui/button";
 import { Form, FormField } from "@/components/ui/form";
 
+// Caution note: we use cn when the condition is dynamic(non-static) or input through props
 interface Props {
     projectId: string;
 };

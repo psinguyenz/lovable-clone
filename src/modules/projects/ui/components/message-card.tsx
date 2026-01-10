@@ -6,6 +6,8 @@ import { format } from "date-fns";
 import Image from "next/image";
 import { ChevronRightIcon, Code2Icon } from "lucide-react";
 
+// Caution note: we use cn when the condition is dynamic(non-static) or input through props
+// 1. Messages from User
 interface UserMessageProps {
   content: string;
 }
@@ -20,6 +22,7 @@ const UserMessage = ({content}: UserMessageProps) => {
   )
 }
 
+// 2. Show the code product/review
 interface FragmentCardProps {
   fragment: Fragment;
   isActiveFragment: boolean;
@@ -54,6 +57,7 @@ const FragmentCard = ({
   )
 };
 
+// 3. Message froms AI
 interface AssistantMessageProps {
   content: string;
   fragment: Fragment | null;
@@ -104,6 +108,7 @@ const AssistantMessage = ({
   )
 }
 
+// 4. Redirect based on role
 interface MessageCardProps {
   content: string;
   role: MessageRole;

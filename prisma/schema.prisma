@@ -24,6 +24,15 @@ datasource db {
 //   authorId  Int
 // }
 
+model Project {
+  id String @id @default(uuid())
+  name String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  messages Message[]
+}
+
 enum MessageRole {
   USER
   ASSISTANT
@@ -41,6 +50,9 @@ model Message {
   type MessageType
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt // a decorator that update this field when we update the message model
+
+  projectId String
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade) // if the project gets deleted, the message gets deleted
 
   // The message doesn't have to have a fragment (the "?" marked as optional)
   // If the user sending a message, there will be no fragment, only for the AI response

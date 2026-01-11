@@ -4,12 +4,22 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { MessageCard } from "./message-card";
 import { MessageForm } from "./message-form";
 import { useEffect, useRef } from "react";
+import { Fragment } from "@/generated/prisma/client";
+import { MessageLoading } from "./message-loading";
 
 interface Props {
+    // any changes you make here have to correspond to the caller on "project-view.tsx"
     projectId: string;
+    activeFragment: Fragment | null;
+    setActiveFragment: (fragment: Fragment | null) => void;
 };
 
-export const MessagesContainer = ({ projectId }: Props) => {
+export const MessagesContainer = ({ 
+    // this has to correspond to the Props Interface
+    projectId,
+    activeFragment,
+    setActiveFragment, 
+}: Props) => {
     const bottomRef = useRef<HTMLDivElement>(null);
     const trpc = useTRPC();
 
@@ -17,21 +27,28 @@ export const MessagesContainer = ({ projectId }: Props) => {
     // It's not really faster tho but visually faster
     const { data: messages } = useSuspenseQuery(trpc.messages.getMany.queryOptions({
         projectId: projectId,
+    }, {
+        // TODO: Temporary live message update
+        refetchInterval: 5000, // refresh after every 5 seconds
     }));
 
-    useEffect(() => {
-        const lastAssistantMessage = messages.findLast(
-            (message) => message.role === "ASSISTANT", // load the last message the assistant sent
-        );
+    // TODO: This is causing problem
+    // useEffect(() => {
+    //     const lastAssistantMessageWithFragment = messages.findLast(
+    //         (message) => message.role === "ASSISTANT" && !!message.fragment, // load the last message the assistant sent
+    //     );
 
-        if (lastAssistantMessage) {
-            // TODO SET ACTIVE FRAGMENT
-        }
-    }, [messages]);
+    //     if (lastAssistantMessageWithFragment) {
+    //         setActiveFragment(lastAssistantMessageWithFragment.fragment) // also, select the latest message's fragment
+    //     }
+    // }, [messages, setActiveFragment]);
 
     useEffect(() => {
         bottomRef.current?.scrollIntoView();
     }, [messages.length]);
+
+    const lastMessage = messages[messages.length - 1];
+    const isLastMessageUser = lastMessage?.role === "USER";
 
     return (
         <div className="flex flex-col flex-1 min-h-0">
@@ -44,11 +61,12 @@ export const MessagesContainer = ({ projectId }: Props) => {
                             role={message.role}
                             fragment={message.fragment}
                             createdAt={message.createdAt}
-                            isActiveFragment={false}
-                            onFragmentClick={() => {}}
+                            isActiveFragment={activeFragment?.id === message.fragment?.id} // check if there's a fragment
+                            onFragmentClick={() => setActiveFragment(message.fragment)} // select the fragment
                             type={message.type}
                         />
                     ))}
+                    {isLastMessageUser && <MessageLoading />}
                     {/* auto scroll down to the last message */}
                     <div ref={bottomRef} /> 
                 </div>

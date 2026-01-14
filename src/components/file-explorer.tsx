@@ -1,3 +1,4 @@
+// This combine data structure from utils.ts and UI from tree-view.tsx
 import { CopyCheckIcon, CopyIcon } from "lucide-react";
 import { useState, useMemo, useCallback, Fragment } from "react";
 
@@ -13,11 +14,8 @@ import {
     BreadcrumbSeparator,
     BreadcrumbEllipsis,
 } from "@/components/ui/breadcrumb";
-import { file, minSize } from "zod/v4";
 import { convertFilesToTreeItems } from "@/lib/utils";
 import { TreeView } from "./tree-view";
-import { fi } from "date-fns/locale";
-import { workUnitAsyncStorageInstance } from "next/dist/server/app-render/work-unit-async-storage-instance";
 
 type FileCollection = { [path: string]: string};
 
@@ -76,11 +74,13 @@ const FileBreadcrumb = ({ filePath } : FileBreadcrumbProps) => {
                         <BreadcrumbSeparator />
 
                         <BreadcrumbItem>
+                            {/* print "..." in the middle */}
                             <BreadcrumbEllipsis />
                         </BreadcrumbItem>
                         <BreadcrumbSeparator />
 
                         <BreadcrumbItem>
+                            {/* BreadcrumbPage will highlight the file name */}
                             <BreadcrumbPage className="font-medium">
                                 {lastSegment}
                             </BreadcrumbPage>
@@ -114,6 +114,7 @@ export const FileExplorer = ({
         return fileKeys.length > 0 ? fileKeys[0] : null;
     });
 
+    // useMemo help it only reruns when the files list change, make the experience smoother
     const treeData = useMemo(() => {
         return convertFilesToTreeItems(files);
     }, [files]);
@@ -128,8 +129,9 @@ export const FileExplorer = ({
 
     const handleCopy = useCallback(() => {
         if (selectedFile) {
+            // copy code content into temp memory
             navigator.clipboard.writeText(files[selectedFile]);
-            setCopied(true);
+            setCopied(true); // to change it to CopyCheckIcon
             setTimeout(() => {
                 setCopied(false);
             }, 2000);
@@ -175,6 +177,7 @@ export const FileExplorer = ({
                         </div>
                     </div>
                 ) : (
+                    // if nothing is selected yet then output this line
                     <div className="flex h-full items-center justify-center text-muted-foreground">
                         Select a file to view it&apos;s content
                     </div>

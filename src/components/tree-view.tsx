@@ -1,3 +1,4 @@
+// This will turn the structures we created in src/lib/utils.ts into a collapsible and viewable interface
 import { TreeItem } from "@/types";
 import {
     Collapsible,
@@ -36,6 +37,7 @@ export const TreeView = ({
                     <SidebarGroup>
                         <SidebarGroupContent>
                             <SidebarMenu>
+                                {/* go through the highest level (root) and put it to Component Tree to continue processing */}
                                 {data.map((item, index) => (
                                     <Tree 
                                         key={index}
@@ -62,12 +64,16 @@ interface TreeProps {
     parentPath: string;
 }
 
+
 const Tree = ({ item, selectedValue, onSelect, parentPath }: TreeProps) => {
     const [name, ...items] = Array.isArray(item) ? item: [item];
+    // if item is a Folder ex: ["src", "app.js"], then name will be "src", items will be "app.js"
+    // if item is a File then name will be "app.js", items will be empty
     const currentPath = parentPath ? `${parentPath}/${name}` : name;
+    // ex: src + components + button.tsx = src/components/button.tsx
 
     if (!items.length) {
-        // It's a file
+        // It's a file (because items is empty)
         const isSelected = selectedValue === currentPath;
 
         return (
@@ -91,6 +97,7 @@ const Tree = ({ item, selectedValue, onSelect, parentPath }: TreeProps) => {
                 className="group/collapsible [&[data-state=open]>button>svg:first-child]:rotate-90"
                 defaultOpen
             >
+                {/* CollapsibleTrigger show icon Folder and name, when pressed will open or close */}
                 <CollapsibleTrigger asChild>
                     <SidebarMenuButton>
                         <ChevronRightIcon className="transition-transform" />
@@ -100,6 +107,8 @@ const Tree = ({ item, selectedValue, onSelect, parentPath }: TreeProps) => {
                         </span>
                     </SidebarMenuButton>
                 </CollapsibleTrigger>
+
+                {/* Inside itself calls another Tree to draw the child node, this repeats until it reaches File */}
                 <CollapsibleContent>
                     <SidebarMenuSub>
                         {items.map((subItem, index) => (

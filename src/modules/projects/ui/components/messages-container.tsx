@@ -22,6 +22,7 @@ export const MessagesContainer = ({
 }: Props) => {
     const bottomRef = useRef<HTMLDivElement>(null);
     const trpc = useTRPC();
+    const lastAssistantMessageIdRef = useRef<string | null>(null);
 
     // the useSuspenseQuery if being used in a deeper component (like messages-container) then the page will load faster
     // It's not really faster tho but visually faster
@@ -32,16 +33,23 @@ export const MessagesContainer = ({
         refetchInterval: 5000, // refresh after every 5 seconds
     }));
 
-    // TODO: This is causing problem
-    // useEffect(() => {
-    //     const lastAssistantMessageWithFragment = messages.findLast(
-    //         (message) => message.role === "ASSISTANT" && !!message.fragment, // load the last message the assistant sent
-    //     );
+    useEffect(() => {
+        const lastAssistantMessage = messages.findLast(
+            (message) => message.role === "ASSISTANT"
+            // if can't find will return undefined
+        );
 
-    //     if (lastAssistantMessageWithFragment) {
-    //         setActiveFragment(lastAssistantMessageWithFragment.fragment) // also, select the latest message's fragment
-    //     }
-    // }, [messages, setActiveFragment]);
+        if (
+            // the question mark will return false if lastAssistantMessage's undefined
+            lastAssistantMessage?.fragment &&
+            lastAssistantMessage.id !== lastAssistantMessageIdRef.current 
+            // the lastAMes.id will only renew when user input a new message, then it will run the if statement below
+            // otherwise, this will always be False to prevent it from setting a new Active Fragment every 5 seconds in refetch
+        ) {
+            setActiveFragment(lastAssistantMessage.fragment);
+            lastAssistantMessageIdRef.current = lastAssistantMessage.id;
+        }
+    }, [messages, setActiveFragment]);
 
     useEffect(() => {
         bottomRef.current?.scrollIntoView();

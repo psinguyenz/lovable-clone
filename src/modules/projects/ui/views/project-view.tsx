@@ -44,7 +44,8 @@ export const ProjectView = ({ projectId }: Props) => {
                         />
                     </Suspense>
                 </ResizablePanel>
-                <ResizableHandle withHandle />
+                {/* the ResizableHandle have the same class as in src/components/file-explorer.tsx */}
+                <ResizableHandle className="hover:bg-primary transition-colors" />
                 <ResizablePanel
                     defaultSize={65} // this and the above size has to add up to 100
                     minSize={50}

@@ -1,5 +1,6 @@
 # Vibe Engine AI
 
+https://vibe-engine-ai.vercel.app/
 A modern, AI-powered application builder that enables users to create apps and websites through natural language conversations. Built with Next.js 15, TypeScript, and a robust tech stack for scalable, production-ready applications.
 
 ## 🚀 Features

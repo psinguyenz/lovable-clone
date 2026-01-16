@@ -42,7 +42,7 @@ export const MessageForm = ({ projectId }: Props) => {
 
     const createMessage = useMutation(trpc.messages.create.mutationOptions({
         // this happens after we submit
-        onSuccess: (data) => {
+        onSuccess: () => {
             form.reset(); // delete form content after succesfully submitted
             queryClient.invalidateQueries(
                 // refresh messages

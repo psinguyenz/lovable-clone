@@ -66,7 +66,7 @@ export const codeAgentFunction = inngest.createFunction(
       model: openai({ 
         model: "gpt-5-nano",
         defaultParameters: {
-          temperature: 0.1, // 0.1 = reliable, less randomized
+          temperature: 1, // 0.1 = reliable, less randomized
         }
       }),
       tools: [

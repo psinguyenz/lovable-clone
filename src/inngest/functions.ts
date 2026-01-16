@@ -5,6 +5,7 @@ import { getSandbox, lastAssistantTextMessageContent } from "./utils";
 import { z } from "zod";
 import { FRAGMENT_TITLE_PROMPT, PROMPT, RESPONSE_PROMPT } from "@/prompt";
 import { prisma } from "@/lib/db";
+import { SANDBOX_TIMEOUT } from "./type";
 
 interface AgentState {
   summary: string;
@@ -18,6 +19,7 @@ export const codeAgentFunction = inngest.createFunction(
   async ({ event, step }) => {
     const sandboxId = await step.run("get-sandbox-id", async () => {
       const sandbox = await Sandbox.create("vibe-nextjs-siz-test-4"); // the same name with `sandbox-templates/nextjs/e2b.toml` file
+      await sandbox.setTimeout(SANDBOX_TIMEOUT) // this make the sandbox last for 10 minutes
       return sandbox.sandboxId;
     });
 
@@ -29,8 +31,9 @@ export const codeAgentFunction = inngest.createFunction(
           projectId: event.data.projectId,
         },
         orderBy: {
-          createdAt: "desc", // TODO: Change to "asc" if AI doesn't understand what's the last message
+          createdAt: "desc",
         },
+        take: 5, // messages history window
       });
 
       for (const message of messages) {
@@ -42,7 +45,7 @@ export const codeAgentFunction = inngest.createFunction(
         })
       }
 
-      return formattedMessages; // return the whole conversation
+      return formattedMessages.reverse(); // return the whole conversation but reversed so the model know what's the last message
     });
 
     const state = createState<AgentState>(

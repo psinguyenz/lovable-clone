@@ -29,8 +29,7 @@ export const MessagesContainer = ({
     const { data: messages } = useSuspenseQuery(trpc.messages.getMany.queryOptions({
         projectId: projectId,
     }, {
-        // TODO: Temporary live message update
-        refetchInterval: 5000, // refresh after every 5 seconds
+        refetchInterval: 2000, // refresh after every 5 seconds (this could work since it's not a live chat)
     }));
 
     useEffect(() => {

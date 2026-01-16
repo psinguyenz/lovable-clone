@@ -315,19 +315,6 @@ Make sure to:
 - Configure all environment variables
 - Run database migrations
 - Set up Inngest webhook endpoints
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## 📄 License
-
-This project is private and proprietary.
-
-## 📞 Support
-
-For support, please open an issue in the repository or contact the development team.
-
 ---
 
 Built with ❤️ using Next.js, TypeScript, and modern web technologies.

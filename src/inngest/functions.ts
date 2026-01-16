@@ -150,7 +150,7 @@ export const codeAgentFunction = inngest.createFunction(
     const network = createNetwork<AgentState>({
       name: "coding-agent-network",
       agents: [codeAgent],
-      maxIter: 50, // limit how many loops the agent can do
+      maxIter: 15, // limit how many loops the agent can do
       // only stop when reaches this (to limit OpenAI credits use) or ends with <task_summary>
       router: async ({ network }) => {
         const summary = network.state.data.summary; // if we detect summary in the network state, we break the network

@@ -57,8 +57,7 @@ Before you begin, ensure you have the following installed:
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
-   cd vibe
+   git clone https://github.com/psinguyenz/lovable-clone.git
    ```
 
 2. **Install dependencies**
@@ -125,7 +124,7 @@ vibe/
 │   └── migration_lock.toml
 │
 ├── public/                          # Static assets
-│   ├── logo.svg
+│   ├── logo.svg                     # Custom logo
 │   ├── file.svg
 │   ├── globe.svg
 │   ├── next.svg
@@ -154,11 +153,11 @@ vibe/
 │   │   │   │   └── route.ts         # Inngest webhook handler
 │   │   │   └── trpc/
 │   │   │       └── [trpc]/
-│   │   │           └── route.ts     # tRPC API endpoint
+│   │   │           └── route.ts     # tRPC API endpoint '/api/trpc'
 │   │   ├── projects/
 │   │   │   └── [projectId]/
 │   │   │       └── page.tsx         # Project detail page
-│   │   ├── error.tsx                # Error boundary
+│   │   ├── error.tsx                # Global error
 │   │   ├── favicon.ico
 │   │   ├── globals.css              # Global styles
 │   │   └── layout.tsx               # Root layout
@@ -166,54 +165,42 @@ vibe/
 │   ├── components/                  # Reusable React components
 │   │   ├── ui/                      # Shadcn UI components
 │   │   │   ├── accordion.tsx
-│   │   │   ├── alert-dialog.tsx
-│   │   │   ├── alert.tsx
-│   │   │   ├── avatar.tsx
-│   │   │   ├── badge.tsx
-│   │   │   ├── button.tsx
-│   │   │   ├── card.tsx
-│   │   │   ├── dialog.tsx
-│   │   │   ├── form.tsx
-│   │   │   ├── input.tsx
-│   │   │   ├── label.tsx
-│   │   │   ├── select.tsx
-│   │   │   ├── textarea.tsx
 │   │   │   └── ... (50+ UI components)
 │   │   ├── code-view/
-│   │   │   ├── code-theme.css
+│   │   │   ├── code-theme.css       # Dark theme
 │   │   │   └── index.tsx            # Code syntax highlighting
 │   │   ├── file-explorer.tsx        # File tree explorer
 │   │   ├── hint.tsx                 # Hint/tooltip component
 │   │   ├── tree-view.tsx            # Tree view component
-│   │   └── user-control.tsx         # User control component
+│   │   └── user-control.tsx         # Clerk user control component
 │   │
 │   ├── generated/                   # Generated code
 │   │   └── prisma/                  # Generated Prisma client
 │   │
 │   ├── hooks/                       # Custom React hooks
-│   │   ├── use-current-theme.ts
-│   │   ├── use-mobile.ts
-│   │   └── use-scroll.ts
+│   │   ├── use-current-theme.ts     # Select theme
+│   │   ├── use-mobile.ts            # Custom React use-mobile hooks
+│   │   └── use-scroll.ts            # Disable normal scroll
 │   │
 │   ├── inngest/                     # Inngest background jobs
-│   │   ├── client.ts                # Inngest client setup
-│   │   ├── functions.ts             # Background job functions
-│   │   ├── type.ts                  # Type definitions
-│   │   └── utils.ts                 # Utility functions
+│   │   ├── client.ts                # Create client to send and receive events
+│   │   ├── functions.ts             # Background job functions, agent set up and tools
+│   │   ├── type.ts                  # SANDBOX_TIMEOUT
+│   │   └── utils.ts                 # Custom utility functions
 │   │
 │   ├── lib/                         # Utility libraries
 │   │   ├── db.ts                    # Database connection
 │   │   ├── usage.ts                 # Usage tracking utilities
-│   │   └── utils.ts                 # General utilities
+│   │   └── utils.ts                 # General utilities like cn and File Explorer related
 │   │
-│   ├── modules/                      # Feature modules
+│   ├── modules/                     # Feature modules
 │   │   ├── home/                    # Home module
-│   │   │   ├── constants.ts         # Home constants
+│   │   │   ├── constants.ts         # Suggestions build
 │   │   │   └── ui/
 │   │   │       └── components/
-│   │   │           ├── navbar.tsx
-│   │   │           ├── project-form.tsx
-│   │   │           └── projects-list.tsx
+│   │   │           ├── navbar.tsx   # Nav bar above
+│   │   │           ├── project-form.tsx         # Project format
+│   │   │           └── projects-list.tsx        # Projects of an user
 │   │   ├── messages/                # Messages module
 │   │   │   └── server/
 │   │   │       └── procedures.ts    # tRPC message procedures
@@ -222,15 +209,15 @@ vibe/
 │   │   │   │   └── procedures.ts    # tRPC project procedures
 │   │   │   └── ui/
 │   │   │       ├── components/
-│   │   │       │   ├── fragment-web.tsx
-│   │   │       │   ├── message-card.tsx
-│   │   │       │   ├── message-form.tsx
-│   │   │       │   ├── message-loading.tsx
-│   │   │       │   ├── messages-container.tsx
-│   │   │       │   ├── project-header.tsx
-│   │   │       │   └── usage.tsx
+│   │   │       │   ├── fragment-web.tsx         # UI of the fragment
+│   │   │       │   ├── message-card.tsx         # Render 1 message
+│   │   │       │   ├── message-form.tsx         # Message format
+│   │   │       │   ├── message-loading.tsx      # UI of messages loading
+│   │   │       │   ├── messages-container.tsx   # The whole chat panel: messages list + input
+│   │   │       │   ├── project-header.tsx       # UI of the header
+│   │   │       │   └── usage.tsx                # UI of the usage
 │   │   │       └── views/
-│   │   │           └── project-view.tsx
+│   │   │           └── project-view.tsx         # View a whole project
 │   │   └── usage/                   # Usage tracking module
 │   │       └── server/
 │   │           └── procedures.ts    # tRPC usage procedures
@@ -243,9 +230,9 @@ vibe/
 │   │   ├── query-client.tsx         # React Query client
 │   │   └── server.tsx               # tRPC server setup
 │   │
-│   ├── middleware.ts                # Next.js middleware
+│   ├── middleware.ts                # Used for redirect
 │   ├── prompt.ts                    # AI prompt templates
-│   └── types.ts                     # TypeScript type definitions
+│   └── types.ts                     # TreeItem
 │
 ├── .env.example                     # Environment variables template
 ├── components.json                  # Shadcn UI configuration

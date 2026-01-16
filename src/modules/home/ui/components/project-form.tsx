@@ -44,6 +44,9 @@ export const ProjectForm = () => {
                 // refresh projects
                 trpc.projects.getMany.queryOptions()
             );
+            queryClient.invalidateQueries(
+                trpc.usage.status.queryOptions(),
+            );
             router.push(`/projects/${data.id}`);
             // TODO: Invalidate usage status
         },
@@ -56,7 +59,9 @@ export const ProjectForm = () => {
                 // router.push("/sign-in");
             }
 
-            // TODO: Redirect to pricing page if specific error
+            if (error.data?.code === "TOO_MANY_REQUESTS") {
+                router.push("/pricing"); // samething in the message-form
+            }
         }
     }))
 

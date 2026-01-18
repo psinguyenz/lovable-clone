@@ -206,7 +206,10 @@ export const codeAgentFunction = inngest.createFunction(
     //   `Write the following snippet: ${event.data.value}!`,
     // );
 
-    const result = await network.run(event.data.value, {state});
+    // const result = await network.run(event.data.value, {state});
+    const originalPrompt = event.data.value;
+    const repeatedPrompt = `${originalPrompt}\n${originalPrompt}`; // Using Prompt Repetition from Google Research 17/12/25 "https://arxiv.org/pdf/2512.14982"
+    const result = await network.run(repeatedPrompt, { state });
 
     const fragmentTitleGenerator = createAgent({
       name: "fragment-title-generator",

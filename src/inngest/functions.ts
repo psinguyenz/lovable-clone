@@ -63,16 +63,16 @@ export const codeAgentFunction = inngest.createFunction(
       name: "code-agent",
       description: "An expert coding agent",
       system: PROMPT,
-      // model: openai({ 
-      //   model: "gpt-5-nano",
-      //   defaultParameters: {
-      //     temperature: 1, // 0.1 = reliable, less randomized
-      //   }
-      // }),
-
-      model: gemini({
-        model: "gemini-1.5-flash"
+      model: openai({ 
+        model: "gpt-5-nano",
+        defaultParameters: {
+          temperature: 1, // 0.1 = reliable, less randomized
+        }
       }),
+
+      // model: gemini({
+      //   model: "gemini-1.5-flash"
+      // }),
       tools: [
 
         //1st tool

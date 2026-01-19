@@ -1,5 +1,5 @@
 import { inngest } from "./client";
-import { openai, createAgent, createTool, createNetwork, type Tool, type Message, createState } from "@inngest/agent-kit";
+import { openai, createAgent, createTool, createNetwork, type Tool, type Message, createState, gemini } from "@inngest/agent-kit";
 import { Sandbox } from "@e2b/code-interpreter"
 import { getSandbox, lastAssistantTextMessageContent } from "./utils";
 import { z } from "zod";
@@ -63,11 +63,15 @@ export const codeAgentFunction = inngest.createFunction(
       name: "code-agent",
       description: "An expert coding agent",
       system: PROMPT,
-      model: openai({ 
-        model: "gpt-5-nano",
-        defaultParameters: {
-          temperature: 1, // 0.1 = reliable, less randomized
-        }
+      // model: openai({ 
+      //   model: "gpt-5-nano",
+      //   defaultParameters: {
+      //     temperature: 1, // 0.1 = reliable, less randomized
+      //   }
+      // }),
+
+      model: gemini({
+        model: "gemini-2.5-flash"
       }),
       tools: [
 

@@ -6,12 +6,15 @@ import { z } from "zod";
 import { FRAGMENT_TITLE_PROMPT, PROMPT, RESPONSE_PROMPT } from "@/prompt";
 import { prisma } from "@/lib/db";
 import { SANDBOX_TIMEOUT } from "./type";
+import { firecrawl } from "@/lib/firecrawl";
 
 interface AgentState {
   summary: string;
   files: { [path:string]: string}; 
   // these two lines will fix the "any" type error input
 };
+
+const URL_REGEX = /https?:\/\/[^\s]+/g;
 
 export const codeAgentFunction = inngest.createFunction(
   { id: "code-agent" },
@@ -212,7 +215,29 @@ export const codeAgentFunction = inngest.createFunction(
 
     // const result = await network.run(event.data.value, {state});
     const originalPrompt = event.data.value;
-    const repeatedPrompt = `${originalPrompt}\n${originalPrompt}`; // Using Prompt Repetition from Google Research 17/12/25 "https://arxiv.org/pdf/2512.14982"
+
+    // adding firecrawl
+    const urls = await step.run("extract-urls", async () => {
+      return originalPrompt.match(URL_REGEX) ?? [];
+    }) as string[];
+
+    const scrapedContent = await step.run("scrape-urls", async () => {
+      const scrapeResults = await Promise.all(
+        urls.map(async (url) => {
+          // this function from firecrawl doc, you can even add search method
+          const scapreResult = await firecrawl.scrape(
+            url,
+            { formats: ["markdown"]},
+          );
+          return scapreResult.markdown ?? null;
+        })
+      );
+      return scrapeResults.filter(Boolean).join("\n\n"); // filter the null-unsuccessful ones
+    });
+
+    const repeatedPrompt = scrapedContent 
+    ? `Context:\n${scrapedContent}\n\nQuestion: ${originalPrompt}\n${originalPrompt}` 
+    : originalPrompt; // Using Prompt Repetition from Google Research 17/12/25 "https://arxiv.org/pdf/2512.14982"
     const result = await network.run(repeatedPrompt, { state });
 
     const fragmentTitleGenerator = createAgent({
